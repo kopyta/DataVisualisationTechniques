@@ -1,0 +1,299 @@
+---
+title: "Praca domowa 3"
+author: "Zuzanna Kotlińska i Agata Kopyt"
+date: "23 11 2021"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(forcats)
+```
+
+# Wstęp
+
+Celem naszej pracy było przeprowadzenie dwóch eksperymentów sprawdzających, jak forma wykresu wpływa na jego czytelność. Chciałyśmy przekonać się, czy zastosowanie dobrych praktyk przy tworzeniu wykresów przekonuje osoby niezwiązane z analizą danych. Jednocześnie badałyśmy osoby w wieku 18-25 lat, czyli od dziecka otoczone wykresami i zestawieniami. Czy faktycznie dla przeciętnej osoby wykres jest źródłem informacji czy czymś, co przede wszystkim ma być przyjemne dla oka? Czy jej zdolności odczytywania wykresów są lepsze niż zakładano?
+
+# Część pierwsza
+
+W pierwszym eksperymencie sprawdziłyśmy, czy osoby niezwiązane z analizą danych chętniej wybierają wykres, z którego
+są w stanie łatwo odczytać informacje, czy ten który wydaje się być bardziej atrakcyjny, lecz mniej czytelny.
+W zależności, który wykres wybrały, musiały odpowiedzieć na kilka pytań dotyczących danych znajdujących się na nim,
+między innymi oszacować różnice między określonymi wartościami. 
+\newpage
+
+## Wybór wykresu
+
+Ankietowani mieli do wyboru dwa poniżej przedstawione wykresy.
+
+
+**Wykres 1**
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres1.png')
+
+```
+
+**Wykres 2**
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres.png')
+
+```
+
+
+Statystyki prezentują się następująco:
+
+
+**Wybór wykresu**
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres_1.png')
+
+```
+
+Osoby, które wybrały wykres nr 2 stwierdziły, że jest o wiele bardziej czytelny, łatwiej określić konkretne liczby
+i odczytać z niego zależności. Jako atut wskazały fakt, że słupki zaczynają się na tym samym poziomie.
+Zwolennicy wykresu nr 1 przyznają, że jest on mniej szczegółowy, ale bardziej intuicyjny i przykuwa wzrok. Zaletą jest dla
+nich fakt, że nie trzeba odczytywać informacji z osi, a kolor i płeć są wyraźnie uwidocznione.
+
+Ale czy na pewno intuicja działa w tym wypadku i to, co widzimy na pierwszy rzut oka jest poprawne?
+
+## Pytania
+
+W pierwszym pytaniu należało wskazać, jakie wykształcenie ma największy odsetek kobiet patrząc na wybrany wcześniej
+wykres.
+
+Prawie połowa osób analizująca wykres nr 1 odpowiedziała źle, wybierając wykształcenie policealne oraz średnie zawodowe.
+Przy wykresie 2 odpowiedź na to pytanie okazała się być łatwym zadaniem - wszyscy wybrali prawidłową opcję.
+
+
+**Skuteczność obu grup przy pierwszym pytaniu**
+
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres_2.png')
+
+```
+
+
+Drugie pytanie polegało na określeniu, która z płci ma większy odsetek osób z wykształceniem policealnym oraz średnim
+zawodowym. To pytanie nie sprawiło trudności żadnej z grup (w obu przypadkach źle odpowiedziała tylko jedna osoba).
+
+Największe różnice w łatwości odczytywania danych uwidacznia trzecie i czwarte pytanie, gdzie trzeba było szacować wartości. Zdecydowana większość zwolenników wykresu nr 1 odpowiedziała niepoprawnie, a wskazywane przez nich wartości różniły się nawet o 15 punktów procentowych. Osoby, które wybrały wykres nr 2, również popełniały błędy, ale z nieporównywalnie mniejszą częstotliwością.
+\newpage
+
+**Zestawienie odpowiedzi na pytanie 3 dla zwolenników każdego z wykresów:** 
+
+
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres_3.png')
+
+```
+
+
+**Procent prawidłowych odpowiedzi na pytanie 3 w obu grupach:** 
+
+
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres_5.png')
+
+```
+
+\newpage
+
+**Zestawienie odpowiedzi na pytanie 4 dla zwolenników każdego z wykresów:** 
+
+
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres_4.png')
+
+```
+
+
+**Procent prawidłowych odpowiedzi na pytanie 4 w obu grupach:** 
+
+
+
+```{r echo=FALSE, out.height='100%', out.width='80%'}
+knitr::include_graphics('images/wykres_6.png')
+
+```
+
+# Część druga
+
+Po określeniu wyższości wykresów słupkowych nad kołowymi, postanowiłyśmy zbadać jaki sposób ich aranżacji jest najefektywniejszy. Przygotowana ankieta zawierała pytania mające ustalić dobór aranżacji kolejności słupków do przekazu wykresu oraz czy zmiana wartości początkowej osi Y zmanipuluje odbiorcę do wyciągania błędnych wniosków.
+
+## Pytanie 1
+
+Pierwsze polecenie służyło zbadaniu czy odbiorca jest w stanie poprawnie porównać wartości słupków gdy są od siebie oddalone w porównaniu gdy są zestawione jeden przy drugim.
+Ankietowani otrzymali następujące wykresy:
+
+**Wykres 1**
+
+```{r, echo=FALSE}
+df <- readRDS("ramkapd3")
+p1 <- df %>% 
+  ggplot(aes(x=Names, y = Values))+
+  # theme_minimal()+
+  theme(panel.grid.minor.x = element_blank(), 
+        panel.grid.minor.y = element_blank(),
+        plot.title=element_text(face='bold', size=14))+
+  scale_y_continuous(limits = c(0,400),
+                     breaks = seq(0,400,100),expand = c(0,0))+
+  scale_x_continuous(breaks = seq(2007,2016,1))+
+  labs(x="Rok", y="", title="Wykres wartości w kolejnych latach")+
+  geom_col(fill="#D98880")
+
+p1
+```
+
+**Wykres 2**
+
+```{r echo=FALSE}
+
+p2 <- df %>%
+  ggplot(aes(x=reorder(Names,-Values), y = Values))+
+  # theme_minimal()+
+  theme(panel.grid.minor.x = element_blank(), 
+        panel.grid.minor.y = element_blank(),
+        plot.title=element_text(face='bold', size=14))+
+  scale_y_continuous(limits = c(0,400),
+                     breaks = seq(0,400,100),expand = c(0,0))+
+  labs(x="Rok", y="", title = "Wykres wartości posortowanych malejąco")+
+  geom_col(fill="#D98880")
+  
+p2
+
+```
+
+Do obu z nich musieli wybrać wszystkie poprawne odpowiedzi do następującego zadania:
+
+Na podstawie powyższego wykresu wskaż pary lat, dla których słupki mają te same wartości
+
++ 2007 i 2012
++ 2008 i 2012
++ 2009 i 2014
++ 2010 i 2015
++ 2011 i 2016
++ Takie pary nie istnieją
+
+Poprawną odpowiedzią jest "2007 i 2012"
+
+**Podsumowanie pytania 1 dla wykresu 1**
+
+```{r, echo=FALSE}
+odp1 <- data.frame(c("2007 i 2012","2008 i 2012", "2009 i 2014","2010 i 2015","2011 i 2016", "Takie pary nie istnieją"), c(13,14,7,2,12,2))
+colnames(odp1) <- c("Odp", "Wskazania")
+
+odp1 %>% 
+  ggplot(aes(y=reorder(Odp, -Wskazania), x = Wskazania))+
+  theme(
+    plot.title=element_text(face='bold', size=14)
+  )+
+  labs(x= "Liczba wskazań", y ="", title= "Wskaż pary lat, dla których słupki mają te same wartości" , subtitle = "na podstawie odpowiedzi 23 osób")+
+  geom_col()
+```
+
+Jak widać dla wykresu uporządkowanego względem upływu czasu odpowiedzi były zróżnicowane, a poprawna odpowiedź otrzymała nieznacznie więcej wskazań od dwóch niepoprawnych.
+
+**Podsumowanie pytania 1 dla wykresu 2**
+
+```{r, echo=FALSE}
+odp2 <- data.frame(c("2007 i 2012","2008 i 2012", "2009 i 2014","2010 i 2015","2011 i 2016", "Takie pary nie istnieją"), c(21,1,0,0,0,1))
+colnames(odp2) <- c("Odp", "Wskazania")
+
+odp2 %>% 
+  ggplot(aes(y=reorder(Odp, -Wskazania), x = Wskazania))+
+  theme(
+    plot.title=element_text(face='bold', size=14)
+  )+
+  labs(x= "Liczba wskazań", y ="",title ="Wskaż pary lat, dla których słupki mają te same wartości", subtitle = "na podstawie odpowiedzi 23 osób")+
+  geom_col()
+
+```
+
+W przypadku wykresu z wartościami posortowanymi malejąco niemal wszyscy ankietowani udzielili poprawnej odpowiedzi, a błędne odpowiedzi zostały wskazane jedynie 2 razy.
+
+### Pytanie 2
+
+W następnym pytaniu badani poproszeni byli o wskazanie wykresu, który ich zdaniem najlepiej obrazuje zmianę wartości na przestrzeni czasu.
+Możliwymi odpowiedziami były zaprezentowane już wykresy 1 i 2 oraz wykres 3, ukazany poniżej.
+
+**Wykres 3**
+
+```{r, echo= FALSE}
+p3 <- df %>% 
+  ggplot(aes(x=Names, y = Values))+
+  # theme_minimal()+
+  theme(panel.grid.minor.x = element_blank(), 
+        panel.grid.minor.y = element_blank(),
+        plot.title=element_text(face='bold', size=14))+
+  scale_y_continuous(breaks = seq(300,400,100), expand = c(0,0))+
+  scale_x_continuous(breaks = seq(2007,2016,1))+
+  labs(x="Rok", y="", title="Wykres wartości w kolejnych latach", subtitle="z początkiem osi Y w 300")+
+  geom_col(fill="#D98880",position = "dodge")+
+  coord_cartesian(ylim = c(300, 375))
+p3
+```
+
+Jest on wycinkiem wykresu 1 od wartości powyżej 300. Ta zmiana zaburzyła wizualne proporcje wykresu.
+
+**Podsumowanie pytania 2**
+
+```{r, echo =FALSE}
+odp3 <- data.frame(c("Wykres 1", "Wykres 2", "Wykres 3"), c(12,1,9))
+colnames(odp3) <- c("Odp", "Wskazania")
+odp3 %>% mutate(Odp = fct_reorder(Odp,Wskazania)) %>% 
+  ggplot(aes(x ="", y = Wskazania/sum(Wskazania), fill = Odp)) +
+  # theme_minimal()+
+  scale_fill_manual(values = c("#7F8C8D","#616A6B","#424949")) +
+  scale_y_continuous(labels=scales::percent) +
+  theme(
+    plot.title=element_text(face='bold', size=14)
+  )+
+  labs(
+       x = "", 
+       y = "% ankietowanych", 
+       fill = "", title="Który z wykresów najlepiej obrazuje zamianę wartości na przestrzeni czasu?", subtitle = "na podstawie odpowiedzi 22 osób") +
+  geom_col() 
+```
+
+Jak widać większość ankietowanych zdecydowała się na wykres, w którym słupki posegregowane są zgodnie z upływem czasu co wpisuje się w kanon prezentowania tendencji wartości w czasie.
+
+
+### Pytanie 3
+
+Ostatnie pytanie dotyczyło umiejętności określenia proporcji słupków, gdy skala osi Y nie rozpoczynała się w 0. Pozostała nadzieja, że badani czytając wykres nie zwracają uwagi jedynie na to jak prezentują się słupki, ale na całe ich "środowisko" tworzone przez osie i nie ulegną powszechnie stosowanej manipulacji.
+
+Na podstawie wykresu 3 ankietowani określali ilokrotnie zwiększyła się wartość w roku 2016 względem roku 2015.
+Poprawna odpowiedź to w przybliżeniu 1,1, natomiast wizualnie słupek dla roku 2016 jest 2 krotnie większy.
+
+**Podsumowanie pytania 3**
+
+```{r, echo=FALSE}
+odp4 <- data.frame(c("30", "2","50","40", "ok.1,1", "<1","4"), c(2,7,2,1,7,2,1))
+
+colnames(odp4) <- c("Odp", "Wskazania")
+odp4 %>% 
+  ggplot(aes(y=reorder(Odp, -Wskazania), x = Wskazania))+
+  theme(
+    plot.title=element_text(face='bold', size=14)
+  )+
+  labs(x= "Liczba wskazań", y ="", title="Na podstawie wykresu 3 oszacuj ilokrotnie wzrosła wartość \nw roku 2016 w porównaniu do 2015", subtitle = "na podstawie odpowiedzi 23 osób")+
+  geom_col()
+```
+
+Zaskakująco odpowiedzi poprawnej jak i przewidywanej błędnej udzieliło tyle samo badanych. Odpowiedzi 30,40,50 sugerują, że niektórzy ankietowani podawali o ile w przybliżeniu zmieniła się wartość zamiast ilokrotnie.
+
+
+## Podsumowanie
+Społeczeństwo wciąż kuszą wizualnie atrakcyjne wykresy, chociaż jak wykazało badanie kreują one błędne wyobrażenie o przedstawianych wartościach i przez to nie przekazują poprawnie informacji. Zdecydowanie pozytywnym rezultatem jest fakt, że grupa osób, która wybrała wykres obiektywnie przekazujący informacje była niewiele mniejsza od tej, która wybrała wykres wprowadzający w błąd.
+
+Natomiast dla wykresów słupkowych praktyka aranżacji słupków według wartości potwierdziła się dla wykresów mających na celu zwrócenie uwagi odbiorcy na porównywanie wartości. Ankietowani nie radzili sobie z precyzyjnym porównaniem odległych słupków o podobnych wartościach. Gdy chcemy wskazać przebieg tendencji w okresie czasu, odpowiedzi udzielone przez ankietowanych wskazują, że należy słupki posortować względem daty, rosnąco. Dla pewności poprawnego odbioru proporcji słupków zalecamy rozpoczynanie skali osi Y w zerze. Jednak fakt, że tyle samo osób udzieliło poprawnej odpowiedzi co "nabrało się" wskazuje, że część społeczeństwa od dziecka obcująca z wykresami coraz lepiej radzi sobie z odczytywaniem wykresów i zwraca uwagę na skalę na osi, co jest obiecującą prognozą na przyszłość.

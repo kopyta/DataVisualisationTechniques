@@ -1,0 +1,158 @@
+---
+title: "Vinho Verde"
+author: "Agata Kopyt"
+date: "15 01 2022"
+output: 
+  html_document:
+    theme: journal
+    highlight: pygments
+    toc: true 
+    number_sections: true
+    toc_depth: 4
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(dlookr)
+library(visdat)
+library(ggplot2)
+
+df <- read.csv("winequality-red.csv")
+```
+
+# Wstęp
+Dokument przedstawia analizę eksploracyjną danych dotyczących portugalskich win "Vinho Verde", pozyskanych z witryny [Kaggle](https://www.kaggle.com/uciml/red-wine-quality-cortez-et-al-2009). Zawiera omówienie zbioru danych oraz wstępną analizę jego zawartośći.
+
+
+# Omówienie zbioru danych
+Pozyskany zbiór danych składa się z 12 kolumn oraz 1599 obserwacji:
+
++ fixed.acidity   - określa kwasy zawarte w winie stale lub nieulatniające się, w mg/L   
+
++ volatile.acidity    - okresla ilość kwasu octowego w winie, który przy zbyt wysokim poziomie może prowadzić do nieprzyjemnego, octowego smaku, w g/L
+
++ citric.acid   - określa ilość kwasu cytrynowego, może dodać winom „świeżości” i smaku, w g/L
+
++ residual.sugar    - ilość cukru pozostała po zakończeniu fermentacji, w g/L rzadko można znaleźć wina o zawartości poniżej 1 g/L, a wina o zawartości powyżej 45 g/L są uważane za słodkie
+
++ chlorides   - określa ilość soli w winie, w g/L
+
++ free.sulfur.dioxide    - okresla ilość SO2 w formie wolnej, w ppm, zapobiega rozwojowi drobnoustrojów i utlenianiu wina
+
++ total.sulfur.dioxide - okresla łączną ilość SO2 w formie wolnej, w ppm, w niskich stężeniach SO2 jest w większości niewykrywalny w winie, ale przy stężeniu wolnego SO2 powyżej 50 ppm, SO2 staje się widoczne w nosie i smaku wina
+
++ density   - określa gęstość wina w g/ml, jest zbliżona do gęstości wody w zależności od procentowej zawartości alkoholu i cukru          
+
++ pH    - opisuje kwasowość lub zasadowość wina w skali od 0 (bardzo kwaśne) do 14 (bardzo zasadowe); większość win ma od 3 do 4 w skali pH                   
+
++ sulphates   - określa ilość siarczanów, które mogą przyczynić się do zwiększenia poziomu dwutlenku siarki (S02), działają jako środek przeciwdrobnoustrojowy i przeciwutleniacz          
+
++ alcohol   - określa procent zawartości alkoholu w winie          
+
++ quality   - zmienna wyjściowa (na podstawie danych sensorycznych, przyjmuje wartości od 0 do 10)
+
+
+```{r description, echo=FALSE, message=FALSE,warning=FALSE}
+vis_dat(df)
+```
+
+Na podstawie powyższego wykresu stwierdzam, że analizowane dane są wartościami liczbowymi. Poniższa tabela przedstawia najważniejsze informacje na temat każdej zmiennej.
+
+```{r description2, echo=FALSE, message=FALSE,warning=FALSE}
+
+description <- df %>% describe() %>%
+  select(variable, na, mean, sd) %>% 
+  cbind(as.data.frame(apply(df,2,min))) %>% 
+  cbind(as.data.frame(apply(df,2,max))) %>% 
+  cbind(as.data.frame(apply(df, 2, function(x) length(unique(x)))))
+colnames(description) <- c("Zmienna","Liczba NA", "Średnia","Odchylenie standardowe",
+                           "Wartość minimalna", "Wartość maksymalna", "Unikalne wartości")
+rownames(description) <- NULL
+
+knitr::kable(description)
+```
+
+<br/><br/>
+Jak widać w zbiorze nie ma braków danych, a wartości zmiennych (oprócz zawartości dwutlenku siarki) oscylują wokół średniej. Warto zauważyć, że zmienna "quality" jest typu dyskretnego, zatem będę jej używać jako zmiennej typu dyskretnego. Z tabeli wynika również, że w zbiorze nie znajdują się wina słodkie.
+
+# Analiza danych
+
+Zacznijmy od analizy rozkładu zmiennych "quality", "alcohol" oraz "residual.sugar"
+
+## Rozkłady
+
+### Quality
+```{r qualitydistrib, echo=FALSE, message=FALSE,warning=FALSE}
+df$quality <- as.character(df$quality)
+df %>% ggplot(aes(x=quality))+
+  geom_bar()
+```
+
+Wina nie są szczególnie zróżnicowane pod względem jakości, dominują wina przeciętne.
+
+### Alcohol
+```{r alcodistrib, echo=FALSE, message=FALSE,warning=FALSE}
+df %>% ggplot(aes(x=alcohol))+
+  geom_density()
+```
+
+Przeważają wina o zawartości alkoholu ok. 9.5%. Znaczącą rolę w zbiorze pełnią też te o zawartości alkoholu ok. 11%.
+
+### Residual.sugar
+```{r sugardistrib, echo=FALSE, message=FALSE,warning=FALSE}
+df %>% ggplot(aes(x=residual.sugar))+
+  geom_density()
+```
+
+W zbiorze dominują wina o zawartości cukru ok. 2g/L. W zbiorze znajdują się też  śladowe ilości win o większej słodkości. Wszystkie byłyby sklasyfikowane jako wytrawne.
+
+## Zależności
+
+Wykres korelacji pomiędzy zmiennymi przedstawia się następująco:
+
+```{r correlation, echo=FALSE, message=FALSE,warning=FALSE}
+df$quality <- as.numeric(df$quality)
+vis_cor(df)
+```
+
+Większość korelacji wynika z chemicznych właściwości zmiennych, z tego powodu najbardziej interesujące są zależności zmiennych do jakości. Ponadto zbadam niektóre właściwości win ze względu na ich słodkość.
+
+### Quality vs Alcohol
+
+```{r qA, echo=FALSE, message=FALSE,warning=FALSE}
+df %>% ggplot(aes(alcohol, color = cut(quality, breaks = c(1,3,6,8)))) +
+  geom_freqpoly()+
+  guides(color = guide_legend(title="quality"))
+```
+
+Analizując wykresy dla win lepszych (quality = 7,8), przeciętnych (quality = 4,5,6) oraz słabych (quality = 3),wynika, że lepsze jakościowo wina mają większą zawartość alkoholu. Należy jednak pamiętać, że reprezentacja "lepszych" win w tym zbiorze jest znacząco mniejsza od reprezentacji win "przeciętnych".
+
+### Quality vs Sulphates
+
+```{r qS, echo=FALSE, message=FALSE,warning=FALSE}
+df %>% ggplot(aes(sulphates, color = cut(quality, breaks = c(1,3,6,8)))) +
+  geom_freqpoly()+
+  guides(color = guide_legend(title="quality"))
+```
+
+Z powyższego wykresu wynika, że lepsze jakościowo wina z analizowanego zbioru zawierają więcej siarczanów. Należy jednak pamiętać, że reprezentacja "lepszych" win w tym zbiorze jest znacząco mniejsza od reprezentacji win "przeciętnych".
+
+### Residual.sugar vs Alcohol
+
+```{r rA, echo=FALSE, message=FALSE,warning=FALSE}
+df %>% ggplot(aes(residual.sugar, alcohol)) +
+  geom_hex()
+```
+
+Zbiór danych zawiera najwięcej win o niskiej zawartości cukru i niskiej zawartości alkoholu. Zawartość alkoholu jest najbardziej zróżnicowana dla win o mniejszej słodkości. Zawartość cukru jest najbardziej zróżnicowana dla win o mniejszej zawartości alkoholu. Z wykresu wynika, że w większości przypadków wina o większej zawartości alkoholu są mniej słodkie.
+
+### Residual.sugar vs Sulphates
+
+```{r rS, echo=FALSE, message=FALSE,warning=FALSE}
+df %>% ggplot(aes(residual.sugar, sulphates)) +
+  geom_hex()
+```
+
+Zbiór danych zawiera najwięcej win o niskiej zawartości cukru i niskiej zawartości siarczanów. Zawartość siarczanów jest najbardziej zróżnicowana dla win o mniejszej słodkości.Zawartość cukru jest najbardziej zróżnicowana dla win o mniejszej zawartości siarczanów. Z wykresu wynika, że w większości przypadków wina o większej zawartości siarczanóW są mniej słodkie, natomiast wina słodsze mają zawartość siarczanów w przedziale ok. [0.4,1.6].

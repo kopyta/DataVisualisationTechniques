@@ -1,0 +1,75 @@
+---
+title: "Praca domowa 2"
+author: "Agata Kopyt"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Poprawiana wizualizacja
+
+Zdecydowałam się poprawić wykres wykonania rezerwy ogólnej budżetu państwa, zamieszczony na stronie rządowej 19.10.2021r.
+
+## Źródła
+Wykres: [Rezerwa Ogólna i rezerwy celowe - stan na 30 września 2021r.](https://www.gov.pl/web/finanse/wykresy-za-2021-r)
+
+Dane do wykresu: [Rozdysponowanie rezerwy ogólnej do 30 września 2021r.](https://www.gov.pl/web/finanse/informacja-za-2021-r)
+
+![Wizualizacja do poprawy](/Users/Agatka/Downloads/Wizualizacja.png)
+
+# Utworzona wizualizacja
+## Kod
+
+```{r, eval = FALSE}
+library(ggplot2)
+library(dplyr)
+options(scipen = 999)
+
+stanRezerwy <- c( 'Rozdysponowano', 'Pozostało')
+kwota <- c(354108.2, 145891.8)
+rezerwaOgolna <- data.frame(stanRezerwy, kwota)
+
+# View(rezerwaOgolna)
+
+rezerwaOgolna %>% 
+  ggplot(aes(x ="", y = kwota/sum(kwota), fill = stanRezerwy)) +
+    geom_col() +
+    scale_fill_manual(values = c("#ffa65c", "#5AB4AC"))+
+    scale_y_continuous(labels=scales::percent)+
+    labs(title = "Wykonanie rezerwy ogólnej budżetu państwa",
+         subtitle ="stan na dzień 30.09.2021r.",
+         x = "", 
+         y = "udział w kwocie", 
+         fill = "")
+
+```
+## Wykres
+```{r, include=FALSE}
+library(ggplot2)
+library(dplyr)
+options(scipen = 999)
+
+stanRezerwy <- c( 'Rozdysponowano', 'Pozostało')
+kwota <- c(354108.2, 145891.8)
+rezerwaOgolna <- data.frame(stanRezerwy, kwota)
+```
+
+```{r, echo=FALSE}
+rezerwaOgolna %>% 
+  ggplot(aes(x ="", y = kwota/sum(kwota), fill = stanRezerwy)) +
+    geom_col() +
+    scale_fill_manual(values = c("#ffa65c", "#5AB4AC"))+
+    scale_y_continuous(labels=scales::percent)+
+    labs(title = "Wykonanie rezerwy ogólnej budżetu państwa",
+         subtitle ="stan na dzień 30.09.2021r.",
+         x = "", 
+         y = "udział w kwocie", 
+         fill = "")
+
+```
+
+# Uzasadnienie
+
+Oryginalny wykres był wykresem kołowym, a w dodatku trójwymiarowym. Niestety ludzie nie są w stanie poprawnie odczytywać takich wykresów, dlatego zdecydowałam się na wykres kolumnowy, dwuwymiarowy. Przy kolorowaniu zrezygnowałam z gradientu - jego użycie uważam za nietrafione, bo sprawia to wrażenie jakby część grupy "szarej" należała też do "ciemnoniebieskiej". Ponadto wykorzystane przeze mnie barwy są przyjazne dla osób ze ślepotą barw.
